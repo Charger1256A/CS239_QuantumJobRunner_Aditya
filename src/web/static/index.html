@@ -448,7 +448,10 @@ function monitor(e) {
     const o = e.observation || {};
     if (o.error) return;
     if (e.action === "check_budget") setBudget(o.budget_remaining_seconds);
-    if (e.action === "run_simulator") addJob(o);
+    if (e.action === "run_simulator") {
+      addJob(o);
+      state.approved = false;  // approval must come after the simulator run (P6)
+    }
     if (e.action === "run_hardware") {
       addJob(o);
       state.hwRuns++;
