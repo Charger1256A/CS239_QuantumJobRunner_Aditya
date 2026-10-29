@@ -4,7 +4,7 @@ import json
 import tempfile
 
 from phase1.llm import ScriptedLLM
-from phase1.main import run_scenario
+from phase1.main import SCENARIO_DIR, run_scenario
 
 S = lambda thought, action, **args: {"thought": thought, "action": action, "args": args}
 
@@ -37,7 +37,7 @@ def main():
         return r
 
     quantum_lab.QuantumLab.build_circuit = build
-    scenario = json.load(open("phase1/scenarios/01_happy_path.json"))
+    scenario = json.load(open(SCENARIO_DIR / "01_happy_path.json"))
     with tempfile.TemporaryDirectory() as d:
         final, (jp, mp) = run_scenario(scenario, llm, d)
         events = json.load(open(jp))["events"]

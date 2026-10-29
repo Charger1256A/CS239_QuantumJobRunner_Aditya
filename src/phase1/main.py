@@ -4,8 +4,8 @@
   python -m phase1.main --all
 """
 import argparse
-import glob
 import json
+from pathlib import Path
 
 from .agents import build_agents
 from .llm import OpenAICompatibleLLM
@@ -13,8 +13,11 @@ from .orchestrator import Orchestrator
 from .quantum_lab import QuantumLab
 from .trace_logger import TraceLogger
 
+SCENARIO_DIR = Path(__file__).parent / "scenarios"
+TRACE_DIR = Path(__file__).parent.parent / "traces" / "phase1"
 
-def run_scenario(scenario, llm, out_dir="traces/phase1"):
+
+def run_scenario(scenario, llm, out_dir=TRACE_DIR):
     logger = TraceLogger(scenario, getattr(llm, "model", "unknown"))
     replies = list(scenario.get("user_replies", []))
 
@@ -35,10 +38,10 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--scenario", help="path to a scenario JSON file")
     p.add_argument("--all", action="store_true", help="run every scenario in phase1/scenarios")
-    p.add_argument("--out", default="traces/phase1")
+    p.add_argument("--out", default=str(TRACE_DIR))
     a = p.parse_args()
 
-    files = sorted(glob.glob("phase1/scenarios/*.json")) if a.all else [a.scenario]
+    files = sorted(SCENARIO_DIR.glob("*.json")) if a.all else [a.scenario]
     if not files or files == [None]:
         p.error("give --scenario PATH or --all")
     llm = OpenAICompatibleLLM()

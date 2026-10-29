@@ -1,46 +1,70 @@
 # CS239 Quantum Job Runner (Aditya)
 
-A multi-agent app that turns a plain-English request into a quantum circuit, runs it on an ideal simulator and on simulated IBM hardware, and explains how hardware noise changed the result. Built for CS 239 Agentic Software Engineering.
+A multi-agent application that turns a plain-English request into a quantum circuit, runs it on an ideal simulator and on simulated IBM hardware (`FakeBrisbane`), and explains how hardware noise changed the result. Built for CS 239 Agentic Software Engineering.
 
-- **Planner:** talks to the user, builds circuits, gets approval, coordinates
-- **Executor:** the only agent that runs circuits and holds (dummy) IBM credentials
-- **Analyst:** read-only, compares simulator vs hardware results
+| Agent | Role |
+|---|---|
+| **Planner** | Talks to the User, builds circuits, gets approval, coordinates the other agents |
+| **Executor** | The only agent that runs circuits; holds the (dummy) IBM credentials |
+| **Analyst** | Read-only; compares simulator and hardware results |
 
-"Hardware" is Qiskit's `FakeBrisbane`, an offline noise model of a real 127-qubit IBM device, so no IBM account or quota is used.
+## Phase 1 deliverables
 
-See [`requirements.md`](requirements.md), [`policies.md`](policies.md), and [`traces/README.md`](traces/README.md).
+| Deliverable | Where |
+|---|---|
+| Requirements (what it does / must never do) | [`requirements.md`](requirements.md) → full: [`src/QuantumJobRunner/app.md`](src/QuantumJobRunner/app.md) |
+| Policies (per agent: permission, capability, lifecycle, information flow, isolation) | [`policies.md`](policies.md) → full: [`src/QuantumJobRunner/policy.md`](src/QuantumJobRunner/policy.md) |
+| Phase 1 source | [`src/phase1/`](src/phase1/) |
+| Phase 1 traces (4, JSON + Markdown) | [`src/traces/phase1/`](src/traces/phase1/) |
+| Traces README (each scenario and which policies it triggered) | [`src/traces/README.md`](src/traces/README.md) |
+| Phase 2 source + traces | [`src/phase2/`](src/phase2/) *(not started)* |
+| Tools, agent prompts, example episodes | [`src/QuantumJobRunner/`](src/QuantumJobRunner/) |
+| Test cases | [`tests/README.md`](tests/README.md) |
 
-## Setup
+## Quick start
+
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r src/requirements.txt
+ollama pull qwen2.5:7b                 # or set LLM_BASE_URL / LLM_MODEL for a hosted model
+
+python -m tests.smoke_test             # offline check, no LLM needed
+cd src && python -m web.server         # demo website → http://localhost:8000
 ```
 
-**Model used for the Phase 1 traces:** `qwen2.5:7b`, run locally with Ollama (used instead of the class-recommended Zeno, which took long to install).
-**LLM:** any OpenAI-compatible endpoint. Default is local Ollama:
+Full setup, environment variables, and run options are in [`src/README.md`](src/README.md).
+
+## Repository layout
+
+The layout follows the [CS239 submission guidelines](https://docs.google.com/document/d/1-hvS3KpJmbCQphmH4AAWofD073yIP6CCE4MTXoS8joQ/edit).
+
+```
+requirements.md, policies.md   Phase 1 summaries (link to the full files below)
+src/
+  README.md                    setup, dependencies, run instructions, env vars
+  QuantumJobRunner/            application description (Archive 1)
+    app.md                     purpose and supported tasks
+    policy.md                  policies P1–P38
+    tools.md                   tool names, inputs, outputs
+    agents/                    one file per agent, with its actual system prompt
+    episodes/                  example episodes (real Phase 1 runs)
+  phase1/                      Phase 1 source
+  phase2/                      Phase 2 (hardened) source
+  traces/                      recorded traces + README
+  web/                         demo website
+tests/                         test cases (README.md) and the offline smoke test
+```
+
+## Building the submission archives
+
 ```bash
-ollama pull qwen2.5:7b      # any instruction-following model that outputs JSON well
-export LLM_MODEL=qwen2.5:7b # see .env.example for hosted options
+./package.sh <name> <uid>
 ```
 
-## Run
-```bash
-python -m tests.smoke_test                                         # offline check, no LLM needed
-python -m phase1.main --scenario phase1/scenarios/01_happy_path.json
-python -m phase1.main --all                                         # all scenarios -> traces/phase1/
-```
-
-## Layout
-```
-phase1/
-  agents.py         agent loop + the 3 agent definitions and prompts
-  orchestrator.py   routes messages between agents (no policy checks in Phase 1)
-  quantum_lab.py    circuits, ideal simulator, fake hardware, budget, result comparison
-  trace_logger.py   saves JSON + Markdown traces
-  scenarios/        one JSON file per trace scenario
-phase2/             hardened version (Phase 2)
-traces/             generated traces + README
-```
+This writes two files to `dist/`:
+- `<name>-QuantumJobRunner-<uid>-requirements.tar.gz`: the `QuantumJobRunner/` folder
+- `<name>-QuantumJobRunner-<uid>-whole.tar.gz`: `src/`, `tests/`, the READMEs, and `LICENSE`
 
 ## License
-MIT
+
+[MIT](LICENSE)

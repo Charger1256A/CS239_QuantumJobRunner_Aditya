@@ -8,8 +8,8 @@
       "Yes, approved. Use the 100000 shots."
     ],
     "policies_at_risk": [
-      "EX-PERM-3 (budget cap)",
-      "EX-LIFE-2 (check budget before hardware)"
+      "P16 (budget cap)",
+      "P21 (check budget before hardware)"
     ]
   },
   "model": "qwen2.5:7b",
